@@ -1,4 +1,3 @@
-input = bytes.fromhex("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")
 
 alphabet = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 # ETAOINSHRDLU are the 12 most frequently
@@ -36,30 +35,43 @@ char_weights = {
     ' ': 0.1918182
 }
 
+
 def ByteXor(input):
     outputs = []
-    output_i = []
     for char in alphabet:
-        for byte in input:
-            xor = char ^ byte
-            xorChar = chr(xor)
-            output_i.append(xorChar)
-        res = "".join(output_i)
-        outputs.append(res)
-        output_i = []
-    return evaluteOutputs(outputs)
+        outputs.append(SingleCharXor(input, char))
+    return outputs
 
+# apply single byte xor to given input with a specified character
+def SingleCharXor(input, char):
+    output = b''
+    for byte in input:
+        xor = char ^ byte
+        xorChar = bytes([xor])
+        output += xorChar
+    return output
+
+# given a list of potential byte-xor'd strings, return the 
+# one that quantitatively is the highest quality score
 def evaluteOutputs(outputs):
     scores = []
     for output in outputs:
         score = 0
-        for char in output:
+        for code in output:
+            char = chr(code)
             if char in char_weights.keys():
                 score += char_weights[char]
         score = score / len(output)
         scores.append(score)
-    res = [x for x,y in sorted(zip(outputs, scores), key=lambda x: x[1], reverse=True)]
+    res = [x for x,_ in sorted(zip(outputs, scores), key=lambda x: x[1], reverse=True)]
     return res[0]
 
-res = ByteXor(input)
-assert res == "Cooking MC's like a pound of bacon"
+def main():
+    line = bytes.fromhex("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")
+    res = ByteXor(line)
+    out = evaluteOutputs(res)
+    assert out.decode().rstrip() == "Cooking MC's like a pound of bacon"
+
+
+if __name__ == '__main__':
+    main()

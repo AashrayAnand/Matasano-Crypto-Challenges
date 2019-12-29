@@ -61,7 +61,11 @@ def hexToB64(in_):
     # combine each b64 character into resulting output string
     return "".join(reversed(out_))
 
-res = hexToB64(in_)
-print("output value is:", res)
-print("expected value is:", out_)
-assert res == out_
+def main():
+    res = hexToB64(in_)
+    print("output value is:", res)
+    print("expected value is:", out_)
+    assert res == out_
+
+if __name__ == '__main__':
+    main()
