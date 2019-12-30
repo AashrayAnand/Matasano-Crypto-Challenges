@@ -1,7 +1,5 @@
 
 alphabet = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-# ETAOINSHRDLU are the 12 most frequently
-# used characters in the english language
 
 # use ocurrences of each letter in output of each
 # XOR to determine character which will give expected output
@@ -35,10 +33,9 @@ char_weights = {
     ' ': 0.1918182
 }
 
-
-def ByteXor(input):
+def XorTryAllKeys(input):
     outputs = []
-    for char in alphabet:
+    for char in range(256):
         outputs.append(SingleCharXor(input, char))
     return outputs
 
@@ -51,27 +48,29 @@ def SingleCharXor(input, char):
         output += xorChar
     return output
 
+# get the char. frequency score for a given string
+def getScore(output):
+    score = 0
+    for byte in output:
+        char = chr(byte).lower()
+        score += char_weights.get(char, 0)
+    return score
+
 # given a list of potential byte-xor'd strings, return the 
-# one that quantitatively is the highest quality score
+# one that quantitatively is the highest quality string
+# by character frequency
 def evaluteOutputs(outputs):
     scores = []
     for output in outputs:
-        score = 0
-        for code in output:
-            char = chr(code)
-            if char in char_weights.keys():
-                score += char_weights[char]
-        score = score / len(output)
-        scores.append(score)
-    res = [x for x,_ in sorted(zip(outputs, scores), key=lambda x: x[1], reverse=True)]
+        scores.append(getScore(output))
+    res = [(x, y) for x,y in sorted(zip(outputs, scores), key=lambda x: x[1], reverse=True)]
     return res[0]
 
 def main():
     line = bytes.fromhex("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736")
-    res = ByteXor(line)
+    res = XorTryAllKeys(line)
     out = evaluteOutputs(res)
-    assert out.decode().rstrip() == "Cooking MC's like a pound of bacon"
-
+    assert out[0].decode().rstrip() == "Cooking MC's like a pound of bacon"
 
 if __name__ == '__main__':
     main()
